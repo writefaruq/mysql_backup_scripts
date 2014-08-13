@@ -1,0 +1,2 @@
+#!/bin/bash
+/db01/mysql01/backups/bin/automysqlbackup -bc /db01/mysql01/backups/config/myserver.conf 2> /db01/mysql01/backups/log/automysqlbackup.err > /db01/mysql01/backups/log/automysqlbackup.out
