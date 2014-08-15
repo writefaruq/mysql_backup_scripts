@@ -42,4 +42,3 @@ else
 	    fi	
     fi # end seconds_behind_master check
 fi # end of NULL value check
-

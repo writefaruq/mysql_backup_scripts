@@ -14,51 +14,30 @@ source ${SCRIPT_CONFIG_PATH}/backup_tasks.conf
 source ${SCRIPT_BIN_PATH}/backup_tasks_lib.sh
 
 # Get backup size
-last_backup_size="$(ls -ltr $BACKUP_PATH/`hostname -s`/mysql/daily/redcap | tail -1 | awk '{print $5}')"
-
+if [ -d "$BACKUP_PATH" ]; then
+    last_backup_size="$(ls -ltr $BACKUP_PATH/daily/$DB_NAME | tail -1 | awk '{print $5}')"
+fi
 
 # unmount filesystem
-if [ -d "$BACKUP_PATH" ]; then
-    handle_event "INFO" "$TIMESTAMP: INFO Unmounting file system ." 
-    umount $BACKUP_PATH
-    if (( $?==0 )); then
-	handle_event "INFO" "$TIMESTAMP: INFO File system unmounted sucessfully." 
-    else {
-        handle_event "ERROR" "$TIMESTAMP: ERROR File system unmount failed $?."
-	exit 1
-    }
-    fi
+if [[  $DO_MOUNT -eq 1 ]]; then 
+    source ${SCRIPT_BIN_PATH}/umount_backup_path.sh
 fi
 
 if [[ $CHECK_SLAVE -eq 1 ]]; then
-    # check MySQL slave
-    slave_status=$(mysql -u $MYSQL_USER -p$MYSQL_PASS -e "SHOW GLOBAL STATUS like 'slave_running' " 2>&1 | grep Slave_running | awk -F" " {'print $2 '})
-    handle_event "INFO"  "$TIMESTAMP: INFO MySQL Slave status: $slave_status" 
-    if [ "$slave_status"  == OFF ]; then 
-	    handle_event "INFO"  "$TIMESTAMP: INFO Slave is found stopped. Starting now..." 
-            start_slave=$(mysql -u $MYSQL_USER -p$MYSQL_PASS -e "START SLAVE" 2>&1)
-	    slave_status=$(mysql -u $MYSQL_USER -p$MYSQL_PASS -e "SHOW GLOBAL STATUS like 'slave_running' " 2>&1 | grep Slave_running | awk -F" " {'print $2 '})
-	    if [ $slave_status  == 'ON' ]; then 
-		    handle_event "INFO"  "$TIMESTAMP: INFO Slave has been started." 
-            else {
-            	handle_event "ERROR"  "$TIMESTAMP: ERROR Slave is not started. status is $slave_status." 
-		exit 1
-	    }
-	    fi	
-    else
-        handle_event "INFO"  "$TIMESTAMP: INFO Slave is found running."
-        handle_event "INFO"  "$TIMESTAMP: INFO Exiting now." 
-    fi # end of slave status check
+    source ${SCRIPT_BIN_PATH}/check_slave_start.sh
 fi # end of check slave
 
 # Write to a metrics file
-end_time=$(date +"%s")
+end_time=$(($(date +%s%N)/1000000))
 echo  "$TIMESTAMP Backup finished: $end_time" >> $METRICS_FILE
 
 # read start time and calculate the duration
 start_time="`cat $METRICS_FILE | head -1 | awk -F": " {' print $2 '}`"
-diff=$(( $end_time - $start_time ))
-echo  "$TIMESTAMP Duration: $(($diff / 60)) minutes and $(($diff % 60)) seconds" >> $METRICS_FILE
+handle_event "INFO" "Start time : $start_time ---- End time: $end_time"
+diff=$(( $end_time - $start_time )) 
+echo  "$TIMESTAMP Duration: $diff nanoseconds" >> $METRICS_FILE
+start_time=$(( $start_time / 1000000 )) # convert to sec
+end_time=$(( $end_time / 1000000 ))
 
 # Notice TSM backup gurad time
 TODAY=`date +%Y%m%d`
@@ -86,7 +65,6 @@ if [[ $diff -gt 0 ]]; then
 	speed=$(( $last_backup_size / $diff ))
 fi
 
-echo  "$TIMESTAMP Backup speed: $speed Kb/s" >> $METRICS_FILE
+echo  "$TIMESTAMP Backup speed: $speed Kb/ns" >> $METRICS_FILE
 
-handle_event "INFO"  "$TIMESTAMP  -----------END of Post MySQL backup tasks-------------\n" 
-
+handle_event "INFO"  "$TIMESTAMP  -----------END of Post MySQL backup tasks-------------" 
