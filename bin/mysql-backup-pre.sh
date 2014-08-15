@@ -24,7 +24,10 @@ if [[ $CHECK_RUN -ne 1 ]]; then
 fi
 
 # mount file system, ONLY if data is backed up onto a shared file system
-#source ${SCRIPT_BIN_PATH}/mount_backup_path.sh
+if [[  $DO_MOUNT -eq 1 ]]; then 
+   source ${SCRIPT_BIN_PATH}/mount_backup_path.sh
+fi
+
 
 # Test writability
 temp="$(mktemp ${BACKUP_PATH}/tmp.XXXXXX)"
@@ -62,19 +65,10 @@ else {
 fi
 
 # End the script if we are running in standalone mode
-if [[ $CHECK_RUN -eq 1 ]]; then {
-        # Unmount filesystem, ONLY if we mounted file system before
-        #if [ -d "$BACKUP_PATH" ]; then
-        #	handle_event "INFO" "$TIMESTAMP: INFO Unmounting file system ."
-        #	umount $BACKUP_PATH
-    #           if (( $?==0 )); then
-    #                   handle_event "INFO" "$TIMESTAMP: INFO File system unmounted sucessfully."
-    #           else {
-    #                   handle_event "ERROR" "$TIMESTAMP: ERROR File system unmount failed $?."
-    #                   exit 1
-    #           }
-    #           fi
-        #fi
+if [[$CHECK_RUN -eq 1 ]]; then {
+    if [[  $DO_MOUNT -eq 1 ]]; then 
+        source ${SCRIPT_BIN_PATH}/umount_backup_path.sh
+    fi
 	handle_event "INFO" "$TIMESTAMP: -------------INFO END of Prebackup tasks---------------"
         exit 0
     }
