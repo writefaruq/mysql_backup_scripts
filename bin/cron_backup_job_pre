@@ -1,2 +1,2 @@
 #!/bin/bash
-/db01/mysql01/backups/bin/mysql-backup-pre -a  2> /db01/mysql01/backups/log/pre-automysqlbackup.err > /db01/mysql01/backups/log/pre-automysqlbackup.out
+/db01/mysql01/backups/bin/mysql-backup-pre.sh -a  2> /db01/mysql01/backups/log/pre-automysqlbackup.err > /db01/mysql01/backups/log/pre-automysqlbackup.out
