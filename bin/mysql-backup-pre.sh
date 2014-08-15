@@ -70,28 +70,27 @@ else {
 	}
 fi
 
-# End the script if we are running in standalone mode
+# Proceed the script depending on pre-check mode
 if [[ $CHECK_RUN -eq 1 ]]; then {
-	# unmount 
-	if [[  $DO_MOUNT -eq 1 ]]; then 
-		source ${SCRIPT_BIN_PATH}/umount_backup_path.sh
-	fi
-    	handle_event "INFO" "$TIMESTAMP: -------------INFO END of Prebackup tasks---------------"     
+        # unmount
+        if [[  $DO_MOUNT -eq 1 ]]; then
+                source ${SCRIPT_BIN_PATH}/umount_backup_path.sh
+        fi
+	handle_event "INFO" "$TIMESTAMP: -------------INFO END of Prebackup tasks---------------"
     }
+else {
+    	# Proceed if  checking slave
+        if [[ $CHECK_SLAVE -eq 1 ]]; then
+          source ${SCRIPT_BIN_PATH}/check_slave.sh
+        fi
+
+       	# Write to a metrics file
+        if [[ $CHECK_RUN -ne 1 ]]; then
+                start_time=$(($(date +%s%N)/1000000))
+                echo "$TIMESTAMP Backup started: $start_time" > $METRICS_FILE
+       	fi
+
+       	handle_event "INFO" "$TIMESTAMP: -------------INFO END of Prebackup tasks---------------"
+}
 fi
-
-
-# Proceed if  checking slave
-if [[ $CHECK_SLAVE -eq 1 ]]; then
-  source ${SCRIPT_BIN_PATH}/check_slave.sh
-fi
-
-
-# Write to a metrics file
-if [[ $CHECK_RUN -ne 1 ]]; then
-    start_time=$(($(date +%s%N)/1000000))
-    echo "$TIMESTAMP Backup started: $start_time" > $METRICS_FILE
-fi
-
-handle_event "INFO" "$TIMESTAMP: -------------INFO END of Prebackup tasks---------------"
 
