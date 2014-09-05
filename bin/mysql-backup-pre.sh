@@ -81,7 +81,7 @@ if [[ $CHECK_RUN -eq 1 ]]; then {
 else {
     	# Proceed if  checking slave
         if [[ $CHECK_SLAVE -eq 1 ]]; then
-          source ${SCRIPT_BIN_PATH}/check_slave.sh
+          source ${SCRIPT_BIN_PATH}/check_slave_stop.sh
         fi
 
        	# Write to a metrics file
