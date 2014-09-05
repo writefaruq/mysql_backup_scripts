@@ -15,7 +15,11 @@ source ${SCRIPT_BIN_PATH}/backup_tasks_lib.sh
 
 # Get backup size
 if [ -d "$BACKUP_PATH" ]; then
-    last_backup_size="$(ls -ltr $BACKUP_PATH/daily/$DB_NAME | tail -1 | awk '{print $5}')"
+    last_backup_size="$(ls -ltr $BACKUP_PATH/`hostname -s`/daily/ | tail -1 | awk '{print $5}')" || { 
+    last_backup_size=${ESTIMATED_BACKUP_SIZE}	
+    #handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
+	#exit 1
+}
 fi
 
 # unmount filesystem
