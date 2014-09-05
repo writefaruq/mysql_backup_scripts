@@ -44,10 +44,10 @@ if (( $?==0 )); then
 fi
 
 # Estimate next backup size by reading last backup size from a log file 
-last_backup_size="$(ls -ltr $BACKUP_PATH/daily/* | tail -1 | awk '{print $5}')" || { 
-    last_backup_size=${ESTIMATED_BACKUP_SIZE}	
-    #handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
-	#exit 1
+ last_backup_size=${ESTIMATED_BACKUP_SIZE}
+last_backup_size="$(ls -ltr $DAILY_BACKUP_FILE_PATH | tail -1 | awk '{print $5}')" || { 
+    handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
+	exit 1
 }
 
 #echo "last backup size:$last_backup_size "

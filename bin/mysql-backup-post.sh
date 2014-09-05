@@ -13,13 +13,14 @@ SCRIPT_CONFIG_PATH="/db01/mysql01/backups/config"
 source ${SCRIPT_CONFIG_PATH}/backup_tasks.conf
 source ${SCRIPT_BIN_PATH}/backup_tasks_lib.sh
 
+last_backup_size=${ESTIMATED_BACKUP_SIZE}
+
 # Get backup size
-if [ -d "$BACKUP_PATH" ]; then
-    last_backup_size="$(ls -ltr $BACKUP_PATH/`hostname -s`/daily/ | tail -1 | awk '{print $5}')" || { 
-    last_backup_size=${ESTIMATED_BACKUP_SIZE}	
-    #handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
-	#exit 1
-}
+if [ -d "$DAILY_BACKUP_FILE_PATH" ]; then
+    last_backup_size="$(ls -ltr $$DAILY_BACKUP_FILE_PATH | tail -1 | awk '{print $5}')" || { 	
+    handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
+	exit 1
+    }
 fi
 
 # unmount filesystem
