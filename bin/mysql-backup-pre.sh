@@ -43,10 +43,10 @@ if (( $?==0 )); then
 	handle_event "INFO" "$TIMESTAMP: INFO File system is writeable."
 fi
 
-# Estimate next backup size by reading last backup size from a log file 
- last_backup_size=${ESTIMATED_BACKUP_SIZE}
+# Estimate next backup size by reading last backup size from a log file
+last_backup_size=${ESTIMATED_BACKUP_SIZE}
 last_backup_size="$(ls -ltr $DAILY_BACKUP_FILE_PATH | tail -1 | awk '{print $5}')" || { 
-    handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
+	handle_event "ERROR" "$TIMESTAMP: Can't read the size of last backup $?"
 	exit 1
 }
 
